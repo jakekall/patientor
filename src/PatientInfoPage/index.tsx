@@ -7,6 +7,7 @@ import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 import { Patient } from '../types';
 import { apiBaseUrl } from '../constants';
 import { useStateValue, setPatient } from '../state';
+import EntryDetails from './EntryDetails';
 
 const PatientInfoPage: React.FC = () => {
   const [{ patients }, dispatch] = useStateValue();
@@ -24,7 +25,7 @@ const PatientInfoPage: React.FC = () => {
         console.error(e);
       }
     };
-    if (!patient) {
+    if (!patient?.ssn) {
       fetchPatient();
     }
   }, [dispatch, patient, id]);
@@ -33,29 +34,36 @@ const PatientInfoPage: React.FC = () => {
     return null;
   }
 
-  let genderIconName: SemanticICONS;
-  switch (patient.gender) {
-    case 'male':
-      genderIconName = 'mars';
-      break;
-    case 'female':
-      genderIconName = 'venus';
-      break;
-    default:
-      genderIconName = 'genderless';
-  }
+  const genderIconName = (gender: string): SemanticICONS => {
+    switch (gender) {
+      case 'male':
+        return 'mars';
+      case 'female':
+        return 'venus';
+      default:
+        return 'genderless';
+    }
+  };
 
   return (
     <div className="App">
       <Container>
         <Header as="h2">
           {patient.name}
-          <Icon name={genderIconName} />
+          <Icon name={genderIconName(patient.gender)} />
         </Header>
         <List>
           <List.Item>snn: {patient.ssn}</List.Item>
           <List.Item>occupation: {patient.occupation}</List.Item>
         </List>
+        <Header as="h3">Entries</Header>
+        {patient.entries && patient.entries.length > 0 ? (
+          patient.entries.map((entry) => (
+            <EntryDetails key={entry.id} entry={entry} />
+          ))
+        ) : (
+          <p>No entries...</p>
+        )}
       </Container>
     </div>
   );
